@@ -15,7 +15,7 @@ public class TicketsReader {
         int meanPrice = 0;
         int medianPrice = 0;
         int subtraction = 0;
-        Map<String, Integer> minimumTimeForCarrier;
+        Map<String, Double> minimumTimeForCarrier;
 
         Gson gson = new GsonBuilder().setLenient().create();
 
@@ -54,11 +54,11 @@ public class TicketsReader {
                 System.out.println("Median price for all tickets: " + medianPrice);
                 System.out.println("Subtraction for mean and median: " + subtraction);
                 System.out.println("\nMinimum time between VVO and TLV: ");
-                for (Map.Entry<String, Integer> entry : minimumTimeForCarrier.entrySet()) {
+                for (Map.Entry<String, Double> entry : minimumTimeForCarrier.entrySet()) {
                     String carrier = entry.getKey();
-                    int travelTime = entry.getValue();
+                    Double travelTime = entry.getValue();
                     System.out.println("Carrier: " + carrier
-                            + ", minimum travel time(in minutes): " + travelTime);
+                            + ", minimum travel time(in hours): " + String.format("%.3f",travelTime));
                 }
             } else {
                 System.out.println("The input is not a valid JSON object.");
