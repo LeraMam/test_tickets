@@ -1,20 +1,15 @@
 package org.com.core;
 
-import java.time.Duration;
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.time.Period;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
 public class TicketMapCreator {
-    public static Map<String, Double> createMinimumMap(ArrayList<Ticket> ticketList) {
-        Period period;
-        Duration duration;
-        Double travelTime;
-        Map<String, Double> minimum = new HashMap<>();
+    public static Map<String, Duration> createMinimumMap(ArrayList<Ticket> ticketList) throws IllegalArgumentException {
+        Duration travelTime;
+        Map<String, Duration> minTimeBetweenCarrier = new HashMap<>();
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd.MM.yy");
         DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("H:mm");
         for (Ticket ticket : ticketList) {
@@ -24,31 +19,21 @@ public class TicketMapCreator {
                 LocalDate arrivalDate = LocalDate.parse(ticket.getArrivalDate(), dateFormatter);
                 LocalTime departureTime = LocalTime.parse(ticket.getDepartureTime(), timeFormatter);
                 LocalTime arrivalTime = LocalTime.parse(ticket.getArrivalTime(), timeFormatter);
+                LocalDateTime departureDateTime = LocalDateTime.of(departureDate, departureTime);
+                LocalDateTime arrivalDateTime = LocalDateTime.of(arrivalDate, arrivalTime);
+                if(departureDateTime.compareTo(arrivalDateTime) > 0) throw new IllegalArgumentException("Incorrect dates in tickets");
+                travelTime = Duration.between(arrivalDateTime, departureDateTime);
 
-                if(departureDate.equals(arrivalDate)){
-                    duration = Duration.between(departureTime, arrivalTime);
-                    travelTime = duration.getSeconds() / 3600.0;
-                }
-                else {
-                    period = Period.between(departureDate, arrivalDate);
-                    Double years = period.getYears()*8765.82; //8765.82 is average number of hours in 1 year
-                    Double month = period.getMonths()*730.485; //730.485 is average number of hours in 1 month
-                    Double days = period.getDays() * 24.0;
-                    duration = Duration.between(departureTime, arrivalTime);
-                    Double time = duration.getSeconds() / 3690.0;
-                    travelTime = years + month + days + time;
-                }
-
-                if (minimum.containsKey(carrierName)) {
-                    Double currentMinTime = minimum.get(carrierName);
-                    if (travelTime < currentMinTime) {
-                        minimum.put(carrierName, travelTime);
+                if (minTimeBetweenCarrier.containsKey(carrierName)) {
+                    Duration currentMinTime = minTimeBetweenCarrier.get(carrierName);
+                    if (travelTime.compareTo(currentMinTime) > 0) {
+                        minTimeBetweenCarrier.put(carrierName, travelTime);
                     }
                 } else {
-                    minimum.put(carrierName, travelTime);
+                    minTimeBetweenCarrier.put(carrierName, travelTime);
                 }
             }
         }
-        return minimum;
+        return minTimeBetweenCarrier;
     }
 }
